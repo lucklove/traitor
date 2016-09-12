@@ -2,7 +2,7 @@ extern crate toml;
 extern crate rustc_serialize;
 
 use std::fs::File;
-use std::io::Read;
+use std::io::{self, Read};
 use toml::Value;
 use rustc_serialize::json;
 
@@ -64,14 +64,25 @@ struct ResultItem {
     dst: String,
 }
 
-fn main() {
-    let args: Vec<_> = std::env::args().collect();
-    assert!(args.len() == 2);
-    let config_path = format!("{}/.traitor", std::env::home_dir().unwrap().to_str().unwrap());
-    let conf = Config::new(&config_path);
-    let json_content = api::translate(&args[1], &conf.app_id, &conf.secret);
+fn translate(raw: &str, app_id: &str, secret: &str) {
+    let json_content = api::translate(raw, app_id, secret);
     let decoded: TransResult = json::decode(&json_content).unwrap();
     for item in decoded.trans_result {
         println!("{}", item.dst);
+    }
+}
+
+fn main() {
+    let config_path = format!("{}/.traitor", std::env::home_dir().unwrap().to_str().unwrap());
+    let conf = Config::new(&config_path);
+    let args: Vec<_> = std::env::args().collect();
+    if args.len() == 1 {
+        let mut content = String::new();
+        io::stdin().read_to_string(&mut content).unwrap();
+        translate(&content, &conf.app_id, &conf.secret);
+    } else {
+        for content in &args[1..] {
+            translate(content, &conf.app_id, &conf.secret);
+        }
     }
 }

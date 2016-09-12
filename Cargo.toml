@@ -8,5 +8,5 @@ toml = "0.2"
 rust-crypto = "^0.2"
 hyper = "0.9.10"
 random = "0.12.1"
-url = "1.2.0"
 rustc-serialize = "0.3"
+urlencode = { path = "urlencode" }

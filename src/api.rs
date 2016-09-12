@@ -1,12 +1,13 @@
 extern crate hyper;
 extern crate crypto;
 extern crate random;
-extern crate url;
+extern crate urlencode;
 
 use self::hyper::client::response::Response;
 use self::random::Source;
 use self::crypto::md5::Md5;
 use self::crypto::digest::Digest;
+use self::urlencode::{utf8_percent_encode, DEFAULT_ENCODE_SET};
 use std::ascii::AsciiExt;
 use std::io::Read;
 
@@ -42,7 +43,7 @@ pub fn translate(content: &str, app_id: &str, secret: &str) -> String {
     let to = detect_lang(content);
     let salt = random_salt();
     let sign = sign(app_id, query, salt, secret);
-    let url = format!("http://api.fanyi.baidu.com/api/trans/vip/translate?appid={}&q={}&from={}&to={}&salt={}&sign={}", app_id, query, from, to, salt, sign);
+    let url = format!("http://api.fanyi.baidu.com/api/trans/vip/translate?appid={}&q={}&from={}&to={}&salt={}&sign={}", app_id, utf8_percent_encode(query, DEFAULT_ENCODE_SET), from, to, salt, sign);
     let mut ripen = String::new();
     get(&url).read_to_string(&mut ripen).unwrap();
     ripen
